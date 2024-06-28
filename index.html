@@ -1,0 +1,157 @@
+<!-- (c) 2024 Mykhailo Stetsiuk
+   -
+   - This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at https://mozilla.org/MPL/2.0/.
+   -
+   - SPDX-License-Identifier: MPL-2.0 -->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Simple transliterators (JS)</title>
+        <link href="style.css" rel="stylesheet" type="text/css" />
+    </head>
+    <body class="layout">
+        <div class="tabs">
+            <input type="radio" name="mode" id="cyr_PL" onclick="onSetMode(this)" checked />
+            <label for="cyr_PL">Cyrillic Polish</label>
+            <input type="radio" name="mode" id="lat_UK" onclick="onSetMode(this)" />
+            <label for="lat_UK">Latin Ukrainian</label>
+            <input type="radio" name="mode" id="cyr_FR" onclick="onSetMode(this)" />
+            <label for="cyr_FR">Cyrillic French</label>
+            <input type="radio" name="mode" id="cyr_DE" onclick="onSetMode(this)" />
+            <label for="cyr_DE">Cyrillic German</label>
+            <input type="radio" name="mode" id="cyr_ES" onclick="onSetMode(this)" />
+            <label for="cyr_ES">Cyrillic Spanish</label>
+            <input type="radio" name="mode" id="lat_BE" onclick="onSetMode(this)" />
+            <label for="lat_BE">Latin Belarusian</label>
+            <input type="radio" name="mode" id="cyr_IT" onclick="onSetMode(this)" />
+            <label for="cyr_IT">Cyrillic Italian</label>
+            <input type="radio" name="mode" id="cyr_NL" onclick="onSetMode(this)" />
+            <label for="cyr_NL">Cyrillic Dutch</label>
+            <input type="radio" name="mode" id="lat_KO" onclick="onSetMode(this)" />
+            <label for="lat_KO">Latin Korean</label>
+        </div>
+
+        <textarea id="input" class="textfield layout-grow"></textarea>
+
+        <div class="buttons">
+            <div>
+                <button class="button" onclick="toggleOptions()">🛠 Options</button>
+                <table id="options-lat_UK" class="options-form">
+                    <tr>
+                        <th>Expand Щ</th>
+                        <td><input type="checkbox" name="expandShch"/></td>
+                    </tr>
+                    <tr>
+                        <th>Alternative G</th>
+                        <td><input type="checkbox" name="alternativeG"/></td>
+                    </tr>
+                </table>
+                <table id="options-cyr_PL" class="options-form">
+                    <tr>
+                        <th>Use Щ</th>
+                        <td><input type="checkbox" name="useShcha" checked/></td>
+                    </tr>
+                    <tr>
+                        <th>Cyrillic Й</th>
+                        <td><input type="checkbox" name="cyrillicYot"/></td>
+                    </tr>
+                    <tr>
+                        <th>Ukrainian Є</th>
+                        <td><input type="checkbox" name="ukrainianYe"/></td>
+                    </tr>
+                    <tr>
+                        <th>Ukrainian И</th>
+                        <td><input type="checkbox" name="ukrainianY"/></td>
+                    </tr>
+                    <tr>
+                        <th>Phonetic</th>
+                        <td><input type="checkbox" name="phonetic" checked/></td>
+                    </tr>
+                </table>
+                <table id="options-cyr_FR" class="options-form">
+                    <tr>
+                        <th>Rendering compatibility</th>
+                        <td><input type="checkbox" name="compatMode" checked/></td>
+                    </tr>
+                    <tr>
+                        <th>Resolve E</th>
+                        <td><input type="checkbox" name="tryToGuessE" checked/></td>
+                    </tr>
+                    <tr>
+                        <th>Solidify Ъ (-1: Ъ; 0: Е/Ъ; 1: Е)</th>
+                        <td><input type="range" name="yerSolidification" min="-1" max="1" value="0"/></td>
+                    </tr>
+                    <tr>
+                        <th>Remove final nasal markers</th>
+                        <td><input type="checkbox" name="removeFinalNasals"/></td>
+                    </tr>
+                </table>
+                <table id="options-cyr_DE" class="options-form">
+                    <tr>
+                        <th>Distinct /ç/ and /x/</th>
+                        <td><input type="checkbox" name="softCh"/></td>
+                    </tr>
+                    <tr>
+                        <th>Mark R reduction</th>
+                        <td><input type="checkbox" name="markReducedR" checked/></td>
+                    </tr>
+                    <tr>
+                        <th>Use Ҳ</th>
+                        <td><input type="checkbox" name="khaWithDescender"/></td>
+                    </tr>
+                </table>
+                <table id="options-cyr_ES" class="options-form">
+                    <tr>
+                        <th>Mark silent H</th>
+                        <td><input type="checkbox" name="markH" checked/></td>
+                    </tr>
+                </table>
+                <table id="options-lat_BE" class="options-form">
+                    <tr>
+                        <th>Taraškievica compatibility</th>
+                        <td><input type="checkbox" name="taraskCompat" checked/></td>
+                    </tr>
+                    <tr>
+                        <th>Use both Ł and Ŭ</th>
+                        <td><input type="checkbox" name="separateW" checked/></td>
+                    </tr>
+                </table>
+                <table id="options-cyr_IT" class="options-form">
+                    <th>No options for Italian.</th>
+                </table>
+                <table id="options-cyr_NL" class="options-form">
+                    <tr>
+                        <th>Use neutral И</th>
+                        <td><input type="checkbox" name="useNeutralI"/></td>
+                    </tr>
+                    <tr>
+                        <th>Distrinct H and G</th>
+                        <td><input type="checkbox" name="distrinctH" checked/></td>
+                    </tr>
+                </table>
+                <table id="options-lat_KO" class="options-form">
+                    <tr>
+                        <th>Don't mark silent ㅇ</th>
+                        <td><input type="checkbox" name="silentIeung" checked/></td>
+                    </tr>
+                    <tr>
+                        <th>Use Ē instead of È</th>
+                        <td><input type="checkbox" name="macronE"/></td>
+                    </tr>
+                </table>
+            </div>
+            <button class="button" style="flex-grow: 1;" onclick="perform()">🗘 Transliterate</button>
+        </div>
+
+        <textarea id="output" class="textfield layout-grow" readonly></textarea>
+        
+        <script src="exceptions.js"></script>
+        <script src="transformers.js"></script>
+        <script src="script.js"></script>
+    </body>
+</html>

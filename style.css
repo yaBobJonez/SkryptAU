@@ -1,0 +1,87 @@
+/*
+ * (c) 2024 Mykhailo Stetsiuk
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+/* SPDX-License-Identifier: MPL-2.0 */
+
+@font-face {
+    font-family: "Noto Sans";
+    src: "https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap"
+}
+
+* { box-sizing: border-box; }
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0.4rem;
+}
+body {
+    background: lightblue;
+}
+
+.layout {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    font-family: "Noto Sans";
+}
+.layout-grow {
+    flex-grow: 1;
+}
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    border: 2px solid lightslategray;
+    border-radius: 5px;
+    background: #ffbe6f;
+}
+.tabs > input {
+    display: none;
+}
+.tabs > input + label {
+    flex-grow: 1;
+    padding: 0.3rem;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.5s;
+}
+.tabs > input:checked + label {
+    background: #e66100;
+    color: white;
+}
+
+.textfield {
+    resize: none;
+    background: #eee;
+    border: 2px solid lightslategray;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-around;
+    gap: 5%;
+}
+
+.button {
+    border: 2px solid lightslategray;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.options-form {
+    display: none;
+    background: #eee;
+    border: 2px solid lightslategray;
+    border-radius: 5px;
+    position: absolute;
+}
