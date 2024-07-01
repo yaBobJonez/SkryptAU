@@ -1006,6 +1006,7 @@ function cyrillizeItalian(word) {
                 break;
             case "t": buff += "т"; break;
             case "u": buff += "у"; break;
+            case "ù": buff += "у̀"; break;
             case "w":
             case "v": buff += "в"; break;
             case "x":
