@@ -51,15 +51,15 @@ function onSetMode(radio) {
 function perform() {
     let text = document.getElementById("input").value;
     text = exception_handlers[currentMode](text);
-    let options = {};
-    for (let row of document.getElementById("options-"+currentMode).rows) {
-        let option = row.cells[1].firstChild;
-        if (option.type == "range") options[option.name] = +option.value;
-        else options[option.name] = option.checked;
-    }
     if (currentMode == "cyr_IT") text = transformers[currentMode](text);
-    else text = transformers[currentMode](text, options);
-    document.getElementById('output').value = text;
+    else {
+        let options = {};
+        for (let row of document.getElementById("options-"+currentMode).rows) {
+            let option = row.cells[1].firstChild;
+            if (option.type == "range") options[option.name] = +option.value;
+            else options[option.name] = option.checked;
+        } text = transformers[currentMode](text, options);
+    } document.getElementById('output').value = text;
 }
 
 var optionsOpen = false;

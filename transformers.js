@@ -941,6 +941,7 @@ function cyrillizeItalian(word) {
         const c = cOrig.toLowerCase();
         const cP1 = word[i+1].toLowerCase();
         const cP2 = word[i+2].toLowerCase();
+        const cP3 = word[i+3].toLowerCase();
         let buff = "";
         switch (c) {
             case "à":
