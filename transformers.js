@@ -7,7 +7,8 @@
  */
 // SPDX-License-Identifier: MPL-2.0
 
-function romanizeUkrainian(word, {expandShch = false, alternativeG = false}) {
+function romanizeUkrainian(word, {expandShch = true, separateW = true, alternativeG = false, assimilation = false}) {
+    const isLetter = s => "аеєиіоуюябвгґджзїйклмнпрстфхцчшщь".includes(s);
     word = " " + word + "   ";
     let result = "";
     for (let i = 1; i < word.length-3; i++) {
@@ -19,7 +20,13 @@ function romanizeUkrainian(word, {expandShch = false, alternativeG = false}) {
         switch (c) {
             case "а": buff += "a"; break;
             case "б": buff += "b"; break;
-            case "в": buff += "v"; break;
+            case "в":
+                if (!separateW) buff += "v";
+                else if (!"бвгґджзклмнпрстфхцчшщ".includes(cM1) && "бвгґджзклмнпрстфхцчшщ".includes(cP1)
+                    || "аеєиіоуюя".includes(cM1) && !isLetter(cP1)
+                ) buff += "w";
+                else buff += "v";
+                break;
             case "г":
                 buff += alternativeG ? "g" : "h"; break;
             case "ґ":
@@ -31,8 +38,14 @@ function romanizeUkrainian(word, {expandShch = false, alternativeG = false}) {
                 else if(cM1 == "й") buff += "e";
                 else buff += "je";
                 break;
-            case "ж": buff += "ž"; break;
-            case "з": buff += "z"; break;
+            case "ж":
+                if (assimilation && "сц".includes(cP1)) buff += "z";
+                else buff += "ž";
+                break;
+            case "з":
+                if (assimilation && "шжч".includes(cP1)) buff += "ž";
+                else buff += "z";
+                break;
             case "и": buff += "y"; break;
             case "і": buff += "i"; break;
             case "ї": buff += "ji"; break;
@@ -44,14 +57,26 @@ function romanizeUkrainian(word, {expandShch = false, alternativeG = false}) {
             case "о": buff += "o"; break;
             case "п": buff += "p"; break;
             case "р": buff += "r"; break;
-            case "с": buff += "s"; break;
-            case "т": buff += "t"; break;
+            case "с":
+                if (assimilation && cP1 == "ш") buff += "š";
+                else buff += "s";
+                break;
+            case "т":
+                if (assimilation && "чш".includes(cP1)) buff += "č";
+                else buff += "t";
+                break;
             case "у": buff += "u"; break;
             case "ф": buff += "f"; break;
             case "х": buff += "ch"; break;
             case "ц": buff += "c"; break;
-            case "ч": buff += "č"; break;
-            case "ш": buff += "š"; break;
+            case "ч":
+                if (assimilation && "сц".includes(cP1)) buff += "c";
+                else buff += "č";
+                break;
+            case "ш":
+                if (assimilation && "сц".includes(cP1)) buff += "s";
+                else buff += "š";
+                break;
             case "щ":
                 buff += expandShch? "šč" : "ŝ"; break;
             case "ь":
