@@ -244,10 +244,11 @@ function cyrillizePolish(word, {useShcha = true, cyrillicYot = false, ukrainianY
     } return result;
 }
 
-function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidification = 0, removeFinalNasals = false}){
-    const isLetter = s => "aàâæeéèêëiîïoôœuûùüÿbcçdfghjklmnpqrstvwxyz".includes(s);
+function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidification = 0, removeFinalNasals = false, phoneticize = true}){
     word = " "+word+"   ";
     let result = "";
+    const isLetter = s => "aàâæeéèêëiîïoôœuûùüÿbcçdfghjklmnpqrstvwxyz".includes(s);
+    const isPrevNasal = () => /(а̃|е̃|ө\u0303|ӫ|о̃)$/iu.test(result);
     for (let i = 1; i < word.length-3; i++){
         const cOrig = word[i];
         const cM1 = word[i-1].toLowerCase();
@@ -312,15 +313,32 @@ function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidi
                     buff += "æeéèêëiîïyÿ".includes(cP2)? "кс" : "к";
                 } else if ("'’ʼæeéèêëiîïyÿ".includes(cP1)) buff += "с";
                 else if (cP1 == 'œ' && "cdlmnt".includes(cP2)) buff += "с";
-                else {
+                else if (phoneticize && isPrevNasal()){
+                    if (cP1 == "s" && !isLetter(cP2)) i += 1;
+                    else if (!isLetter(cP1)); //Do nothing
+                    else {
+                        if (cP1 == 'k') i += 1;
+                        buff += "к";
+                    }
+                } else {
                     if (cP1 == 'k') i += 1;
                     buff += "к";
                 } break;
             case "ç": buff += "с"; break;
             case "d":
-                if (cP1 == 'd') i += 1;
-                buff += "д";
-                break;
+                if (phoneticize){
+                    if (cP1 == "s" && !isLetter(cP2)){
+                        i += 1; buff += "haàâæeéèêëiîïoôœuûùüyÿ".includes(cP3)? "т" : "";
+                    } else if (!isLetter(cP1)){
+                        buff += "haàâæeéèêëiîïoôœuûùüyÿ".includes(cP2)? "т" : "";
+                    } else {
+                        if (cP1 == 'd') i += 1;
+                        buff += "д";
+                    }
+                } else {
+                    if (cP1 == 'd') i += 1;
+                    buff += "д";
+                } break;
             case "ë":
             case "e":
                 if (cP1 == 'a' && cP2 == 'u'
@@ -332,14 +350,16 @@ function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidi
                 } else if (cP1 == 'i' || cP1 == 'î'){
                     if (cP2 != 'l' || cP3 != 'l' && isLetter(cP3)) i += 1;
                     buff += "э";
-                } else if (cP1 == 'm' && "bp".includes(cP2)){ //TODO? only b/p?
+                } else if (cP1 == 'm' && "bp".includes(cP2)){
                     i += 1; buff += "а̃";
                 } else if ((cP1 == 'n' || cP1 == 'm')
                            && cP2 != 'm' && cP2 != 'n'
                            && !"aàâæeéèêëiîïoôœuûùüyÿ".includes(cP2)){
                     if (isLetter(cP2) || removeFinalNasals) i += 1;
-                    if ("éiy".includes(cM1)) buff += "е̃";
-                    else buff += "а̃";
+                    if ("éiy".includes(cM1)){
+                        if (cP2 == 't' || (cP2 == 'c' && "æeéèêëiîïyÿ".includes(cP3))) buff += "а̃";
+                        else buff += "е̃";
+                    } else buff += "е̃";
                 } else if (cP1 == 'u' && cP2 == 'n' && !"aàâæeéèêëiîïoôœuûùüyÿ".includes(cP3)){
                     if (isLetter(cP3) || removeFinalNasals) i += 1;
                     i += 1; buff += "ө\u0303";
@@ -349,6 +369,11 @@ function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidi
                     i += 1; buff += "и";
                 } else if (cP1 == 'w'){
                     i += 1; buff += "ью";
+                } else if (cP1 == 'y'){
+                    i += 1;
+                    buff += isLetter(cP2)? "эй" : "э";
+                } else if (phoneticize && !isLetter(cP1)){
+                    if ("bcçdfghjklmnpqrstvwxyz".includes(cP2)) buff += (yerSolidification > 0)? "е" : "ъ";
                 } else if (tryToGuessE){
                     if ("bcçdfghjklmnpqrstvwxyz".includes(cP1) && "bcçdfghjklmnpqrsvwxyz".includes(cP2)
                         || "dhpstxz".includes(cP1) && cP2 == 't'
@@ -387,7 +412,11 @@ function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidi
                 } else if (cP1 == 'u' && "eéèêîiy".includes(cP2) || cP1 == 'h'){
                     i += 1; buff += "г";
                 } else if ("eéèêiîy".includes(cP1)) buff += "ж";
-                else buff += "г";
+                else if (phoneticize && isPrevNasal()){
+                    if (cP1 == "s" && !isLetter(cP2)) i += 1;
+                    else if (!isLetter(cP1)); //Do nothing
+                    else buff += "г";
+                } else buff += "г";
                 break;
             case "h": break; //Silent
             case "i":
@@ -482,6 +511,15 @@ function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidi
             case "p":
                 if (cP1 == 'h'){
                     i += 1; buff += "ф";
+                } else if (phoneticize){
+                    if (cP1 == "s" && !isLetter(cP2)){
+                        i += 1; buff += "haàâæeéèêëiîïoôœuûùüyÿ".includes(cP3)? "п" : "";
+                    } else if (!isLetter(cP1)){
+                        buff += "haàâæeéèêëiîïoôœuûùüyÿ".includes(cP2)? "п" : "";
+                    } else {
+                        if (cP1 == 'p') i += 1;
+                        buff += "п";
+                    }
                 } else {
                     if (cP1 == 'p') i += 1;
                     buff += "п";
@@ -500,7 +538,9 @@ function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidi
                    && "aàâæeéèêëiîïoôœuûùüyÿ".includes(cP1)) buff += "з";
                 else if (cP1 == 'c' && cP2 == 'h'){
                     i += 2; buff += "ш";
-                } else {
+                } else if (phoneticize && !isLetter(cP1))
+                    buff += "haàâæeéèêëiîïoôœuûùüyÿ".includes(cP2)? "з" : "";
+                else {
                     if (cP1 == 'c' && "eéèêëiîïyÿ".includes(cP2)
                        || cP1 == 'ç' || cP1 == 's') i += 1;
                     buff += 'с';
@@ -513,6 +553,15 @@ function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidi
                     else if (cP2 == 'e' && !isLetter(cP3)){
                         buff += (cM1 != 'a')? "ти" : "си";
                     } else buff += "сй";
+                } else if (phoneticize){
+                    if (cP1 == "s" && !isLetter(cP2)){
+                        i += 1; buff += "haàâæeéèêëiîïoôœuûùüyÿ".includes(cP3)? "т" : "";
+                    } else if (!isLetter(cP1)){
+                        buff += "haàâæeéèêëiîïoôœuûùüyÿ".includes(cP2)? "т" : "";
+                    } else {
+                        if (cP1 == 'h' || cP1 == 't') i += 1;
+                        buff += "т";
+                    }
                 } else {
                     if (cP1 == 'h' || cP1 == 't') i += 1;
                     buff += "т";
@@ -534,6 +583,8 @@ function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidi
             case "x":
                 if (cP1 == 'c' && "eéèêëiîïyÿ".includes(cP2)
                     || cP1 == 'h') buff += "к";
+                else if (phoneticize && !isLetter(cP1))
+                    buff += "haàâæeéèêëiîïoôœuûùüyÿ".includes(cP2)? "з" : "";
                 else buff += "кс";
                 break;
             case "y":
@@ -549,7 +600,9 @@ function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidi
             case "z":
                 if (cP1 == "h"){
                     i += 1; buff += "ж";
-                } else buff += "з";
+                } else if (phoneticize && !isLetter(cP1))
+                    buff += "haàâæeéèêëiîïoôœuûùüyÿ".includes(cP2)? "з" : "";
+                else buff += "з";
                 break;
             default: buff += c;
         } if(word[i-1] == 'H' || cOrig.toUpperCase() == cOrig){
@@ -569,6 +622,7 @@ function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidi
 }
 
 //Requires splitting by syllables: 'ҫ' resolving
+//TODO: add option to not use Є; fix Jahr, Atmosphere
 function cyrillizeGerman(word, {softCh = false, markReducedR = true, khaWithDescender = false}) {
     const isLetter = s => "abcdefghijklmnopqrstuvwxyzäöüß".includes(s);
     word = " "+word+"    ";
@@ -754,6 +808,7 @@ function cyrillizeGerman(word, {softCh = false, markReducedR = true, khaWithDesc
     } return result;
 }
 
+//TODO markH = false; fix fresco
 function cyrillizeSpanish(word, {markH = true}) {
     const isLetter = s => "aábcdeéfghiíjklmnñoópqrstuúvwxyz".includes(s);
     word = " "+word+"   ";
@@ -877,6 +932,7 @@ function cyrillizeSpanish(word, {markH = true}) {
     } return result;
 }
 
+//TODO check ł; separateW = false?
 function romanizeBelarusian(word, {taraskCompat = true, separateW = true}) {
     word = " "+word+"   ";
     let result = "";
@@ -957,6 +1013,7 @@ function romanizeBelarusian(word, {taraskCompat = true, separateW = true}) {
 }
 
 //Requires splitting by syllables: 'z' resolving (incl. exceptions)
+//TODO fix panetteria, armonia, equilibrio
 function cyrillizeItalian(word) {
     word = " "+word+"   ";
     let result = "";
@@ -1054,6 +1111,7 @@ function cyrillizeItalian(word) {
     } return result;
 }
 
+//TODO fix zachtjes, aangaven, ochtendzon; -en?
 function cyrillizeDutch(word, {useNeutralI = false, distrinctH = true}) {
     const isLetter = s => "abcdefghijklmnopqrstuvwxĳyz".includes(s);
     word = " "+word+"   ";
@@ -1230,6 +1288,7 @@ function cyrillizeDutch(word, {useNeutralI = false, distrinctH = true}) {
     return result;
 }
 
+//TODO fix 있었다, 그것이; capitalization
 function romanizeKorean(word, {silentIeung = true, macronE = false}) {
     word = "  "+word+"   ";
     word = word.normalize("NFD");

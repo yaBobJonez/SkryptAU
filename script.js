@@ -9,8 +9,8 @@
 
 var placeholders = {
     "cyr_PL": "Впіш свуј текст тутај і начішьніј пшычіск поніжеј.",
-    "lat_UK": "Vvedit́ Vaš tekst tut i natysnit́ knopku nyžče.",
-    "cyr_FR": "Сэзисєз вотръ тэкстъ иси єт апюийєз сюр лъ буто̃н си-дэсус.",
+    "lat_UK": "Wvedit́ Vaš tekst tut i natysnit́ knopku nyžče.",
+    "cyr_FR": "Сэзисє вотръ тэкст иси єт апюийє сюр лъ буто̃н си-дэсу.",
     "cyr_DE": "Гебен Зі һір̌ Ірен Текст айн унд кликен Зі ауф ді Шалтфлэхе унтен.",
     "cyr_ES": "Интрод̆уҙка акѝ су тексто и пулсе ел бото̀н де авахо.",
     "lat_BE": "Uviadzicie svoj tekst tut i nacisnicie knopku nižej.",
@@ -50,14 +50,18 @@ function onSetMode(radio) {
 
 function perform() {
     let text = document.getElementById("input").value;
-    text = exception_handlers[currentMode](text);
+    if (currentMode == "cyr_FR")
+        text = exception_handlers[currentMode](text, document.querySelector('#options-cyr_FR [name="phoneticize"]').checked);
+    else
+        text = exception_handlers[currentMode](text);
     if (currentMode == "cyr_IT") text = transformers[currentMode](text);
     else {
         let options = {};
-        for (let row of document.getElementById("options-"+currentMode).rows) {
-            let option = row.cells[1].firstChild;
-            if (option.type == "range") options[option.name] = +option.value;
-            else options[option.name] = option.checked;
+        for (const option of document.querySelectorAll(`#options-${currentMode} input`)) {
+            if (option.type == "range")
+                options[option.name] = +option.value;
+            else
+                options[option.name] = option.checked;
         } text = transformers[currentMode](text, options);
     } document.getElementById('output').value = text;
 }

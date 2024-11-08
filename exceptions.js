@@ -12,10 +12,11 @@
  * https://wiktionary.org/
  * https://www.lawlessfrench.com/
  * https://www.wordmine.info/
+ * https://motsavec.fr/
  */
 // SPDX-License-Identifier: MPL-2.0
 
-var exceptions_fr = {
+const exceptions_fr = {
   // "ch" — "х"
   "achaine": "aхaine",
   "achéen": "aхéen",
@@ -200,9 +201,6 @@ var exceptions_fr = {
   "cowboy": "cowbohy",
   "goyave": "gohyave",
   "moyse": "mohyse",
-  /*
-   * TODO; unchecked beyond this point
-   */
   // "[gq]ui" — "[гк]юи"
   "aiguillage": "aigüillage", "aiguille": "aigüille", "aiguiller": "aigüiller", "aiguillette": "aigüillette", "aiguillon": "aigüillon", "aiguiser": "aigüiser",
   "linguist*": "lingüist",
@@ -300,14 +298,21 @@ var exceptions_fr = {
   "vexill*": "vexil",
   "*vill*": "vil",
   "whatmille": "whatmile",
+  /*
+   * TODO; unchecked beyond this point
+   */
   // "in" — "ин"
   "sprint": "sprihnt",
   // "on" — "он"
   "canyon": "canyohn",
   // "on" — "е/ъ"
   "monsieur": "mecieur",
-  // "om" — "о"
-  "automne": "autone",
+  // "mn" — "н"
+  "*automn*": "auton",
+  "*damn*": "dan",
+  // silent "t"
+  "hautbois": "haubois",
+  "asthme": "asme",
   // "ow" — "у"
   "clown": "cloun",
   // "ow" ­— "оу"
@@ -456,7 +461,106 @@ var exceptions_fr = {
   "naan": "naahn"
 };
 
-var exceptions_es = {
+const exceptions_fr_phonetic = {
+  // b
+  "*lomb": "plom",
+  "*doub": "dou",
+  "kemb": "kem",
+  // c
+  "estomac": "estoma",
+  "porc": "por",
+  "*tabac": "taba",
+  "caoutchouc": "caoutchou",
+  // d
+  "*land": "lande",
+  "*field": "fielde",
+  "*head": "heade",
+  "*ford": "forde",
+  "david": "davide",
+  "dread": "dreade",
+  "leed": "leede",
+  "mcdonald": "mcdonalde",
+  "ombuds": "ombudse",
+  "*wood": "woode",
+  "raid": "raide",
+  "raunds": "raundse",
+  "sud": "sude",
+  "amands": "amandse",
+  "*shield": "shielde",
+  "zid": "zide",
+  // f
+  "*clef": "clé", //TODO check "clef*"
+  "nerf": "ner",
+  "boeufs": "boeu",
+  "bœufs": "bœu",
+  "piqueboeufs": "piqueboeu",
+  "piquebœufs": "piquebœu",
+  "oeufs": "oeu",
+  "œufs": "œu",
+  "cerfs": "cer",
+  "zeitlofs": "zeitlo",
+  // g
+  "joug": "jou",
+  "*ing": "inge",
+  // p
+  "cap": "cape",
+  "cep": "cepe",
+  "slip": "slipe",
+  // ct
+  "amict": "ami",
+  "*spect": "spè",
+  "*nct": "n",
+  "éject": "éjè",
+  "præfect": "præfè",
+  "traict": "trai",
+  // st
+  "est": "è", // "être" is more common than the noun
+  // t
+  "*ct": "cte",
+  "*pt": "pte",
+  "*st": "ste",
+  "brut": "brute",
+  "dot": "dote",
+  "huit": "huite",
+  "déficit": "déficite",
+  "granit": "granite",
+  "yaourt": "yaourte",
+  // th
+  "bizuth": "bizu",
+  "goth": "go",
+  // l
+  "*aulx": "au",
+  "bacul": "bacu",
+  "cul": "cu",
+  "fils": "fis",
+  "foutrecul": "foutrecu",
+  "fusil": "fusi",
+  "gentil": "genti",
+  "*outil": "outi",
+  "*saoul": "sou",
+  "*saoûl": "sou",
+  // s
+  "*bus": "buse",
+  "sens": "sense",
+  "contresens": "contresense",
+  "antisens": "antisense",
+  "os": "osse",
+  "ours": "ourse",
+  "tennis": "tennisse",
+  // rs
+  "gars": "ga",
+  // x
+  "aix": "aixe",
+  "*index": "indexe",
+  "*pharynx": "pharynxe",
+  // z
+  "*zz": "zze",
+  "*gaz": "gaze",
+  "fez": "feze",
+  "merguez": "mergueze"
+};
+
+const exceptions_es = {
   // "x" — "ҳ"
   "méxico": "méhico",
   "oaxaca": "oahaca",
@@ -474,8 +578,10 @@ var exceptions_es = {
 
 const capitalize = (s) => s[0].toUpperCase() + s.slice(1);
 
-function fix_french(text) {
-  for (const [key, value] of Object.entries(exceptions_fr)) {
+function fix_french(text, phoneticize) {
+  let exceptions = exceptions_fr;
+  if (phoneticize) exceptions = {...exceptions_fr_phonetic, ...exceptions};
+  for (const [key, value] of Object.entries(exceptions)) {
     for (const e of ["", "s", "x"]) {
       let k = key;
       const limitStart = (k[0] != "*")? "(?<!\\p{L})" : "";
