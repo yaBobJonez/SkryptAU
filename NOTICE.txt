@@ -1,0 +1,6 @@
+SkryptAU © 2024–2025 Mykhailo Stetsiuk
+This software is available under the Mozilla Public License Version 2.0 (MPL-2.0).
+
+SkryptAU includes third-party libraries and tools:
+• Vite © 2019–2025 VoidZero Inc. and Vite contributors, MIT License
+• hyphen © 2023 Yevhen Tiurin, ISC License

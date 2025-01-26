@@ -1,0 +1,22 @@
+{
+  "name": "skryptau",
+  "version": "1.2.0",
+  "description": "Automatic tools that implement some concepts of alternative alphabets for several human languages.",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yaBobJonez/SkryptAU.git"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.0.5"
+  },
+  "dependencies": {
+    "hyphen": "^1.10.6"
+  },
+  "license": "MPL-2.0"
+}

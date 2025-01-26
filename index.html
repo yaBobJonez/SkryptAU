@@ -1,4 +1,4 @@
-<!-- (c) 2024 Mykhailo Stetsiuk
+<!-- (c) 2024–2025 Mykhailo Stetsiuk
    -
    - This Source Code Form is subject to the terms of the Mozilla Public
    - License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -106,7 +106,7 @@
                 <table id="options-cyr_DE" class="options-form">
                     <tr>
                         <th>Distinct /ç/ and /x/</th>
-                        <td><input type="checkbox" name="softCh"/></td>
+                        <td><input type="checkbox" name="softCh" checked/></td>
                     </tr>
                     <tr>
                         <th>Mark R reduction</th>
@@ -115,6 +115,10 @@
                     <tr>
                         <th>Use Ҳ</th>
                         <td><input type="checkbox" name="khaWithDescender"/></td>
+                    </tr>
+                    <tr>
+                        <th>Use Я and Є</th>
+                        <td><input type="checkbox" name="useYaAndYe"/></td>
                     </tr>
                 </table>
                 <table id="options-cyr_ES" class="options-form">
@@ -161,9 +165,14 @@
         </div>
 
         <textarea id="output" class="textfield layout-grow" readonly></textarea>
+
+        <p id="hyphen-notice" class="lib-notice">
+            This mode uses the <a href="https://github.com/ytiurin/hyphen">hyphen</a>
+            JS library to split words into syllables, provided under the ISC license.
+        </p>
         
-        <script src="exceptions.js"></script>
-        <script src="transformers.js"></script>
-        <script src="script.js"></script>
+        <script src="exceptions.js" type="module"></script>
+        <script src="transformers.js" type="module"></script>
+        <script src="script.js" type="module"></script>
     </body>
 </html>

@@ -1,5 +1,5 @@
 /*
- * (c) 2024 Mykhailo Stetsiuk
+ * (c) 2024–2025 Mykhailo Stetsiuk
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -578,7 +578,7 @@ const exceptions_es = {
 
 const capitalize = (s) => s[0].toUpperCase() + s.slice(1);
 
-function fix_french(text, phoneticize) {
+export function fix_french(text, phoneticize) {
   let exceptions = exceptions_fr;
   if (phoneticize) exceptions = {...exceptions_fr_phonetic, ...exceptions};
   for (const [key, value] of Object.entries(exceptions)) {
@@ -600,7 +600,7 @@ function fix_french(text, phoneticize) {
   } return text;
 }
 
-function fix_spanish(text) {
+export function fix_spanish(text) {
   for (const [key, value] of Object.entries(exceptions_es)) {
     for (const e of ["", "s"]) {
       let k = key + e;

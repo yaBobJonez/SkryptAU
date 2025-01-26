@@ -1,5 +1,5 @@
 /*
- * (c) 2024 Mykhailo Stetsiuk
+ * (c) 2024–2025 Mykhailo Stetsiuk
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -7,7 +7,9 @@
  */
 // SPDX-License-Identifier: MPL-2.0
 
-function romanizeUkrainian(word, {expandShch = true, separateW = true, alternativeG = false, assimilation = false}) {
+import { hyphenateSync as hyphenate_de } from "hyphen/de";
+
+export function romanizeUkrainian(word, {expandShch = true, separateW = true, alternativeG = false, assimilation = false}) {
     const isLetter = s => "аеєиіоуюябвгґджзїйклмнпрстфхцчшщь".includes(s);
     word = " " + word + "   ";
     let result = "";
@@ -109,7 +111,7 @@ function romanizeUkrainian(word, {expandShch = true, separateW = true, alternati
     } return result;
 }
 
-function cyrillizePolish(word, {useShcha = true, cyrillicYot = false, ukrainianYe = false, ukrainianY = false, phonetic = true}) {
+export function cyrillizePolish(word, {useShcha = true, cyrillicYot = false, ukrainianYe = false, ukrainianY = false, phonetic = true}) {
     word = " "+word+"   ";
     let result = "";
     for (let i = 1; i < word.length-3; i++) {
@@ -244,7 +246,7 @@ function cyrillizePolish(word, {useShcha = true, cyrillicYot = false, ukrainianY
     } return result;
 }
 
-function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidification = 0, removeFinalNasals = false, phoneticize = true}){
+export function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidification = 0, removeFinalNasals = false, phoneticize = true}){
     word = " "+word+"   ";
     let result = "";
     const isLetter = s => "aàâæeéèêëiîïoôœuûùüÿbcçdfghjklmnpqrstvwxyz".includes(s);
@@ -621,14 +623,15 @@ function cyrillizeFrench(word, {compatMode = true, tryToGuessE = true, yerSolidi
     } return result;
 }
 
-//Requires splitting by syllables: 'ҫ' resolving
-//TODO: add option to not use Є; fix Jahr, Atmosphere
-function cyrillizeGerman(word, {softCh = false, markReducedR = true, khaWithDescender = false}) {
+export function cyrillizeGerman(word, {softCh = false, markReducedR = true, useYaAndYe = false, khaWithDescender = false}) {
     const isLetter = s => "abcdefghijklmnopqrstuvwxyzäöüß".includes(s);
-    word = " "+word+"    ";
+    // Split words by syllables but only before "st" or "sp"
+    word = hyphenate_de(word).replace(/\u00AD(?!s[tp])/g, '');
+    word = "  "+word+"    ";
     let result = "";
-    for (let i = 1; i < word.length-4; i++) {
+    for (let i = 2; i < word.length-4; i++) {
         const cOrig = word[i];
+        const cM2 = word[i-2].toLowerCase();
         const cM1 = word[i-1].toLowerCase();
         const c = cOrig.toLowerCase();
         const cP1 = word[i+1].toLowerCase();
@@ -642,7 +645,7 @@ function cyrillizeGerman(word, {softCh = false, markReducedR = true, khaWithDesc
                     i += 1; buff += "э";
                 } else if (cP1 == "i"){
                     i += 1; buff += "ай";
-                } else if (cP1 == "h" || cP1 == "a"){
+                } else if (cP1 == "a"){
                     i += 1; buff += "а̄";
                 } else if (!markReducedR && cP1 == "r" && !"aäeioöuü".includes(cP2)){
                     i += 1; buff += "а̄";
@@ -651,8 +654,6 @@ function cyrillizeGerman(word, {softCh = false, markReducedR = true, khaWithDesc
             case "ä":
                 if (cP1 == "u"){
                     i += 1; buff += "ой";
-                } else if (cP1 == "h"){
-                    i += 1; buff += "э̄";
                 } else buff += "э";
                 break;
             case "b": buff += "б"; break;
@@ -676,7 +677,7 @@ function cyrillizeGerman(word, {softCh = false, markReducedR = true, khaWithDesc
                 } else buff += "д";
                 break;
             case "e":
-                if (cP1 == "e" || cP1 == "h"){
+                if (cP1 == "e"){
                     i += 1; buff += "е̄";
                 } else if (cP1 == "i"){
                     i += 1; buff += "ай";
@@ -689,23 +690,27 @@ function cyrillizeGerman(word, {softCh = false, markReducedR = true, khaWithDesc
                 if (cM1 == "i" && !isLetter(cP1)) buff += "х";
                 else buff += "г";
                 break;
-            case "h": buff += khaWithDescender? "ҳ" : "һ"; break;
+            case "h":
+                if (!"aäeouü".includes(cP1) && "aäeioöuü".includes(cM1)) buff += "\u0304";
+                else buff += khaWithDescender? "ҳ" : "һ";
+                break;
             case "i":
                 if (cP1 == "e" && cP2 == "h"){
                     i += 2; buff += "і";
-                } else if (cP1 == "e" || cP1 == "h"){
+                } else if (cP1 == "e"){
                     i += 1; buff += "і";
+                } else if (cP1 == "h"){
+                    if (!"aäeioöuü".includes(cP2)) i += 1;
+                    buff += "і";
                 } else if (cM1 == "u") buff += "й";
                 else buff += "и";
                 break;
             case "j":
                 if (cP1 == "o" && cP2 == "u"){
                     i += 2; buff += "жу";
-                } else if (cP1 == "a"){
+                } else if (useYaAndYe && cP1 == "a"){
                     i += 1; buff += "я";
-                } else if (cP1 == "o"){
-                    i += 1; buff += "ё";
-                } else if (cP1 == "e"){
+                } else if (useYaAndYe && cP1 == "e"){
                     i += 1; buff += "є";
                 } else buff += "й";
                 break;
@@ -716,17 +721,21 @@ function cyrillizeGerman(word, {softCh = false, markReducedR = true, khaWithDesc
             case "o":
                 if (cP1 == "e"){
                     i += 1; buff += "ё";
-                } else if (cP1 == "o" || cP1 == "h"){
+                } else if (cP1 == "o"){
                     i += 1; buff += "о̄";
                 } else if (cP1 == "i"){
                     i += 1; buff += "ой";
                 } else buff += "о";
                 break;
             case "ö":
-                if (cP1 == "h") i += 1;
+                if (cP1 == "h" && !"aäeioöuü".includes(cP2)) i += 1;
                 buff += "ё";
                 break;
-            case "p": buff += "п"; break;
+            case "p":
+                if (cP1 == "h"){
+                    i += 1; buff += "ф";
+                } else buff += "п";
+                break;
             case "q":
                 buff += "к";
                 if (cP1 == "u"){
@@ -744,11 +753,10 @@ function cyrillizeGerman(word, {softCh = false, markReducedR = true, khaWithDesc
                     i += 2; buff += "ш";
                 } else if (cP1 == "p" || cP1 == "t"){
                     if (!isLetter(cM1)) buff += "ш";
-                    else if (!isLetter(cP2)) buff += "с";
-                    else buff += isLetter(cM1)? "ҫ" : "ш";
+                    else buff += "с";
                 } else if (cP1 == "s"){
                     i += 1; buff += "с";
-                } else if (!isLetter(cM1) && "aäeioöuü".includes(cP1)) buff += "з";
+                } else if ("aäeioöuü".includes(cP1)) buff += "з";
                 else buff += "с";
                 break;
             case "t":
@@ -763,20 +771,18 @@ function cyrillizeGerman(word, {softCh = false, markReducedR = true, khaWithDesc
                            || cP2 == "e" && cP3 == "l" && cP4 == "l"
                            )){
                     i += 1; buff += "цй";
+                } else if (cP1 == "h"){
+                    i += 1; buff += "т";
                 } else if (cP1 == "z"); //Do nothing
                 else buff += "т";
                 break;
             case "u":
-                if (cP1 == "e"){
+                if (cP1 == "e" && !"aäeioöuü".includes(cM1)){
                     i += 1; buff += "ю";
-                } else if (cP1 == "h"){
-                    i += 1; buff += "ӯ";
                 } else buff += "у";
                 break;
             case "ü":
-                if (cP1 == "h"){
-                    i += 1; buff += "ю̄";
-                } else buff += "ю";
+                buff += "ю";
                 break;
             case "v": buff += "ф"; break;
             case "w": buff += "в"; break;
@@ -789,7 +795,10 @@ function cyrillizeGerman(word, {softCh = false, markReducedR = true, khaWithDesc
                     i += 3; buff += "ч";
                 } else buff += "ц";
                 break;
-            case "ß": buff += "с"; break;
+            case "ß":
+                if ("aäeioöuü".includes(cM1) && !"aäeioöuü".includes(cM2)) buff += "\u0304";
+                buff += "с";
+                break;
             default: buff += c;
         } if(cOrig.toUpperCase() == cOrig){
             if ("aädejotx".includes(c)){
@@ -802,14 +811,15 @@ function cyrillizeGerman(word, {softCh = false, markReducedR = true, khaWithDesc
             } else result += buff.toUpperCase();
         } else result += buff;
     } if (softCh) {
-        result = result.replaceAll("ьа", "я");
+        if (useYaAndYe) result = result.replaceAll("ьа", "я");
         result = result.replaceAll("ьо", "ё");
-        result = result.replaceAll("ье", "є");
-    } return result;
+        if (useYaAndYe) result = result.replaceAll("ье", "є");
+    } result = result.replaceAll('\u00AD', '');
+    return result;
 }
 
 //TODO markH = false; fix fresco
-function cyrillizeSpanish(word, {markH = true}) {
+export function cyrillizeSpanish(word, {markH = true}) {
     const isLetter = s => "aábcdeéfghiíjklmnñoópqrstuúvwxyz".includes(s);
     word = " "+word+"   ";
     let result = "";
@@ -933,7 +943,7 @@ function cyrillizeSpanish(word, {markH = true}) {
 }
 
 //TODO check ł; separateW = false?
-function romanizeBelarusian(word, {taraskCompat = true, separateW = true}) {
+export function romanizeBelarusian(word, {taraskCompat = true, separateW = true}) {
     word = " "+word+"   ";
     let result = "";
     for (let i = 1; i < word.length-3; i++) {
@@ -1014,7 +1024,7 @@ function romanizeBelarusian(word, {taraskCompat = true, separateW = true}) {
 
 //Requires splitting by syllables: 'z' resolving (incl. exceptions)
 //TODO fix panetteria, armonia, equilibrio
-function cyrillizeItalian(word) {
+export function cyrillizeItalian(word) {
     word = " "+word+"   ";
     let result = "";
     for (let i = 1; i < word.length-3; i++) {
@@ -1083,7 +1093,7 @@ function cyrillizeItalian(word) {
                 } else if (cP1 == "s"){
                     i += 1; buff += "сс";
                 } else if ("bdgjlmnrvwz".includes(cP1)) buff += "з";
-                else if ("aàeèéiìíîoòóuùúy".includes(cM1) && "aàeèéiìíîoòóuùúy".includes(cP1)) buff += "з"; 
+                else if ("aàeèéiìíîoòóuùúy".includes(cM1) && "aàeèéiìíîoòóuùúy".includes(cP1)) buff += "з";
                 else buff += "с";
                 break;
             case "t": buff += "т"; break;
@@ -1112,7 +1122,7 @@ function cyrillizeItalian(word) {
 }
 
 //TODO fix zachtjes, aangaven, ochtendzon; -en?
-function cyrillizeDutch(word, {useNeutralI = false, distrinctH = true}) {
+export function cyrillizeDutch(word, {useNeutralI = false, distrinctH = true}) {
     const isLetter = s => "abcdefghijklmnopqrstuvwxĳyz".includes(s);
     word = " "+word+"   ";
     word = word.replaceAll("ij", "ĳ");
@@ -1289,7 +1299,7 @@ function cyrillizeDutch(word, {useNeutralI = false, distrinctH = true}) {
 }
 
 //TODO fix 있었다, 그것이; capitalization
-function romanizeKorean(word, {silentIeung = true, macronE = false}) {
+export function romanizeKorean(word, {silentIeung = true, macronE = false}) {
     word = "  "+word+"   ";
     word = word.normalize("NFD");
     let result = "";
