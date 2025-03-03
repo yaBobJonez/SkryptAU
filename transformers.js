@@ -818,7 +818,6 @@ export function cyrillizeGerman(word, {softCh = false, markReducedR = true, useY
     return result;
 }
 
-//TODO markH = false; fix fresco
 export function cyrillizeSpanish(word, {markH = true}) {
     const isLetter = s => "aábcdeéfghiíjklmnñoópqrstuúvwxyz".includes(s);
     word = " "+word+"   ";
@@ -829,6 +828,7 @@ export function cyrillizeSpanish(word, {markH = true}) {
         const c = cOrig.toLowerCase();
         const cP1 = word[i+1].toLowerCase();
         const cP2 = word[i+2].toLowerCase();
+        const cP3 = word[i+3].toLowerCase();
         let buff = "";
         switch (c) {
             case "á": buff += "а̀"; break;
@@ -839,9 +839,7 @@ export function cyrillizeSpanish(word, {markH = true}) {
                 else buff += "в";
                 break;
             case "c":
-                if (cP1 == "c"){
-                    i += 1; buff += "к";
-                } else if (cP1 == "h"){
+                if (cP1 == "h"){
                     i += 1; buff += "ч";
                 } else if (cP1 == "e" || cP1 == "i") buff += "ҫ";
                 else if ("bdgv".includes(cP1)) buff += "г";
@@ -890,7 +888,8 @@ export function cyrillizeSpanish(word, {markH = true}) {
             case "ó": buff += "о̀"; break;
             case "o": buff += "о"; break;
             case "p":
-                buff += (cP1 == "t")? "в" : "п";
+                if (cP1 == "t") buff += "в";
+                else buff += "п";
                 break;
             case "q":
                 if (cP1 == "u") i += 1;
@@ -898,12 +897,8 @@ export function cyrillizeSpanish(word, {markH = true}) {
                 break;
             case "r": buff += "р"; break;
             case "s":
-                if (cP1 == "c"){
-                    i += 1; buff += "с";
-                } else if (cP1 == "h"){
-                    i += 1; buff += "ш";
-                } else if ("bdgv".includes(cP1)
-                           || cP1 == "h" && cP2 == "u") buff += "з";
+                if ("lmbdgv".includes(cP1)
+                    || cP1 == "h" && cP2 == "u" && "aáeéoóuú".includes(cP3)) buff += "з";
                 else buff += "с";
                 break;
             case "t":
