@@ -1017,9 +1017,8 @@ export function romanizeBelarusian(word, {taraskCompat = true, separateW = true}
     } return result;
 }
 
-//Requires splitting by syllables: 'z' resolving (incl. exceptions)
-//TODO fix panetteria, armonia, equilibrio
-export function cyrillizeItalian(word) {
+export function cyrillizeItalian(word, {tryToGuessY = false, monographizeDzh = 2}) {
+    const isLetter = s => "aàbcdeèéfghiìíîjklmnoòópqrstuùúvwxyz".includes(s);
     word = " "+word+"   ";
     let result = "";
     for (let i = 1; i < word.length-3; i++) {
@@ -1035,12 +1034,14 @@ export function cyrillizeItalian(word) {
             case "a": buff += "а"; break;
             case "b": buff += "б"; break;
             case "c":
-                if (cP1 == "c" && cP2 == "i" && "aàoòóuùú".includes(cP3)
-                    || cP1 == "c" && "eèéiìíîy".includes(cP2)){
+                if (cP1 == "c" && cP2 == "i" && "aàoòóuùú".includes(cP3)){
                     i += 2; buff += "тч";
+                } else if (cP1 == "c" && "eèéiìíîy".includes(cP2)){
+                    i += 1; buff += "тч";
                 } else if (cP1 == "i" && "aàoòóuùú".includes(cP2)){
                     i += 1; buff += "ч";
-                } else if ("eèéiìíîy".includes(cP1)) buff += "ч";
+                } else if ("eèéiìíîy".includes(cP1)
+                           || "'’ʼ".includes(cP1) && "eèéiìíîy".includes(cP2)) buff += "ч";
                 else buff += "к";
                 break;
             case "d": buff += "д"; break;
@@ -1049,16 +1050,20 @@ export function cyrillizeItalian(word) {
             case "e": buff += "е"; break;
             case "f": buff += "ф"; break;
             case "g":
-                if (cP1 == "g" && cP2 == "i" && "aàoòóuùú".includes(cP3)
-                    || cP1 == "g" && "eèéiìíîy".includes(cP2)){
-                    i += 2; buff += "ддж";
+                if (cP1 == "g" && cP2 == "i" && "aàoòóuùú".includes(cP3)){
+                    i += 2; buff += ["ддж", "дӡ", "дҗ"][monographizeDzh];
+                } else if (cP1 == "g" && "eèéiìíîy".includes(cP2)){
+                    i += 1; buff += ["ддж", "дӡ", "дҗ"][monographizeDzh];
                 } else if (cP1 == "i" && "aàoòóuùú".includes(cP2)){
-                    i += 1; buff += "дж";
-                } else if (cP1 == "l" && cP2 == "i" && "aàeèéoòóuùú".includes(cP3)){
-                    i += 2; buff += "лљ";
+                    i += 1; buff += ["дж", "ӡ", "җ"][monographizeDzh];
+                } else if (cP1 == "l" && cP2 == "i"){
+                    if ("aàeèéoòóuùú".includes(cM1)) buff += "л";
+                    if ("aàeèéoòóuùú".includes(cP3)) i += 1;
+                    i += 1; buff += "љ";
                 } else if (cP1 == "n"){
-                    i += 1; buff += "нњ";
-                } else if ("eèéiìíîy".includes(cP1)) buff += "дж";
+                    if ("aàeèéoòóuùú".includes(cM1)) buff += "н";
+                    i += 1; buff += "њ";
+                } else if ("eèéiìíîy".includes(cP1)) buff += ["дж", "ӡ", "җ"][monographizeDzh];
                 else buff += "г";
                 break;
             case "h": break; //Silent
@@ -1066,7 +1071,8 @@ export function cyrillizeItalian(word) {
             case "î":
             case "í": buff += "и"; break;
             case "i":
-                if ("aàeèéiìíîoòóuùú".includes(cP1)) buff += "й";
+                if ( tryToGuessY && "aàeèéiìíîoòóuùú".includes(cP1)
+                    && (isLetter(cP2) || "aàeèéiìíîoòóuùú".includes(cM1)) ) buff += "й";
                 else buff += "и";
                 break;
             case "j": buff += "ж"; break;

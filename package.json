@@ -1,6 +1,6 @@
 {
   "name": "skryptau",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Automatic tools that implement some concepts of alternative alphabets for several human languages.",
   "private": true,
   "repository": {
@@ -13,7 +13,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^6.0.5"
+    "vite": "^6.3.5"
   },
   "dependencies": {
     "hyphen": "^1.10.6"

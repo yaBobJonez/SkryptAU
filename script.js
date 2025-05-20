@@ -62,16 +62,14 @@ window.perform = function () {
         text = exception_handlers[currentMode](text, document.querySelector('#options-cyr_FR [name="phoneticize"]').checked);
     else
         text = exception_handlers[currentMode](text);
-    if (currentMode == "cyr_IT") text = transformers[currentMode](text);
-    else {
-        let options = {};
-        for (const option of document.querySelectorAll(`#options-${currentMode} input`)) {
-            if (option.type == "range")
-                options[option.name] = +option.value;
-            else
-                options[option.name] = option.checked;
-        } text = transformers[currentMode](text, options);
-    } document.getElementById('output').value = text;
+    let options = {};
+    for (const option of document.querySelectorAll(`#options-${currentMode} input`)) {
+        if (option.type == "range")
+            options[option.name] = +option.value;
+        else
+            options[option.name] = option.checked;
+    } text = transformers[currentMode](text, options);
+    document.getElementById('output').value = text;
 }
 
 var optionsOpen = false;
