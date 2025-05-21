@@ -1,3 +1,8 @@
 export default {
-    base: "/SkryptAU/"
+    base: "/SkryptAU/",
+    root: "src",
+    build: {
+        outDir: '../dist',
+        emptyOutDir: true
+    }
 }
