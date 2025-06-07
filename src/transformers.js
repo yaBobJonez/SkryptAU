@@ -937,8 +937,8 @@ export function cyrillizeSpanish(word, {markH = true}) {
     } return result;
 }
 
-//TODO check ł; separateW = false?
 export function romanizeBelarusian(word, {taraskCompat = true, separateW = true}) {
+    const isLetter = s => "абвгґдеёжзійклмнопрстуўфхцчшыьэюя".includes(s);
     word = " "+word+"   ";
     let result = "";
     for (let i = 1; i < word.length-3; i++) {
@@ -979,7 +979,7 @@ export function romanizeBelarusian(word, {taraskCompat = true, separateW = true}
             case "т": buff += "t"; break;
             case "у": buff += "u"; break;
             case "ў":
-                if (separateW && "бвгґджзклмнпрстўфхцчш".includes(cP1)) buff += "ł";
+                if (separateW && ("аеёіоуыэюя".includes(cP1) || isLetter(cM1) && !isLetter(cP1))) buff += "w";
                 else buff += "ŭ";
                 break;
             case "ф": buff += "f"; break;
@@ -1122,8 +1122,7 @@ export function cyrillizeItalian(word, {tryToGuessY = false, monographizeDzh = 2
     } return result;
 }
 
-//TODO fix zachtjes, aangaven, ochtendzon; -en?
-export function cyrillizeDutch(word, {useNeutralI = false, distrinctH = true}) {
+export function cyrillizeDutch(word, {omitSilentFinalN = true, useNeutralI = false, distrinctH = true}) {
     const isLetter = s => "abcdefghijklmnopqrstuvwxĳyz".includes(s);
     word = " "+word+"   ";
     word = word.replaceAll("ij", "ĳ");
@@ -1189,6 +1188,7 @@ export function cyrillizeDutch(word, {useNeutralI = false, distrinctH = true}) {
                 } else if (cP1 == "u"){
                     i += 1; buff += "ё";
                 } else buff += "е";
+                if (omitSilentFinalN && isLetter(cM1) && cP1 == "n" && !isLetter(cP2)) i += 1;
                 break;
             case "f": buff += "ф"; break;
             case "g":
@@ -1215,7 +1215,7 @@ export function cyrillizeDutch(word, {useNeutralI = false, distrinctH = true}) {
             case "l": buff += "л"; break;
             case "m": buff += "м"; break;
             case "n":
-                if (cP1 == "g") i += 1;
+                if (cP1 == "g" && !isLetter(cP2)) i += 1;
                 buff += "н";
                 break;
             case "o":
@@ -1259,7 +1259,7 @@ export function cyrillizeDutch(word, {useNeutralI = false, distrinctH = true}) {
             case "t":
                 if (cP1 == "s" && cP2 == "j"){
                     i += 2; buff += "ч";
-                } else if (cP1 == "j"){
+                } else if (cP1 == "j" && cM1 != "h"){
                     i += 1; buff += "ч";
                 } else {
                     if (cP1 == "h") i += 1;
@@ -1299,7 +1299,6 @@ export function cyrillizeDutch(word, {useNeutralI = false, distrinctH = true}) {
     return result;
 }
 
-//TODO fix 있었다, 그것이; capitalization
 export function romanizeKorean(word, {silentIeung = true, macronE = false}) {
     word = "  "+word+"   ";
     word = word.normalize("NFD");
@@ -1405,8 +1404,8 @@ export function romanizeKorean(word, {silentIeung = true, macronE = false}) {
                 else if (cP1 == "ᄋ") buff += "pz";
                 else buff += "p";
                 break;
-            case "ᆺ": buff += "t"; break;
-            case "ᆻ": buff += "t"; break;
+            case "ᆺ": buff += (cP1 == "ᄋ")? "s" : "t"; break;
+            case "ᆻ": buff += (cP1 == "ᄋ")? "s" : "t";; break;
             case "ᆼ": buff += "ň"; break;
             case "ᆽ": buff += "t"; break;
             case "ᆾ": buff += "t"; break;
@@ -1425,9 +1424,6 @@ export function romanizeKorean(word, {silentIeung = true, macronE = false}) {
             case "》": buff += "» "; break;
             default: buff += c;
         } result += buff;
-    } for (let sep of ['。', '. ', '… ', '! ', '? ', '.', '…', '!', '?']) {
-        result = result.split(sep)
-            .map(s => s.charAt(0).toUpperCase() + s.slice(1))
-            .join(sep);
-    } return result;
+    } result = result.replace(/(?<=(?:^|[。…!?.])\P{L}*)\p{L}/gv, l => l.toUpperCase())
+    return result;
 }
